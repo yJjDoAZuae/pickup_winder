@@ -1,8 +1,8 @@
 add_library(display_lib
         display.h
         display.c
-        ImageData.c
-        LCD_2in_test.c
+        # ImageData.c
+        # LCD_2in_test.c
         )
 
 add_executable(display_test

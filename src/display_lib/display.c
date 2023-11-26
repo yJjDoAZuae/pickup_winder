@@ -5,8 +5,9 @@
 #include "fonts.h"
 #include "DEV_Config.h"
 #include "LCD_2in.h"
-#include "LCD_Test.h"
-#include "ImageData.h"
+#include "GUI_Paint.h"
+//#include "LCD_Test.h"
+//#include "ImageData.h"
 #include "display.h"
 
 static const uint16_t DC   =  8;
