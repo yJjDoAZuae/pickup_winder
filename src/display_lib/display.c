@@ -1,6 +1,4 @@
-
 #include <stdio.h>
-#include "pico/stdlib.h"
 
 #include "fonts.h"
 #include "DEV_Config.h"

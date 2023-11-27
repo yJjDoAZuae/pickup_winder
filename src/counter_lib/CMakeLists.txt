@@ -17,7 +17,7 @@ pico_enable_stdio_usb(counter_test 1)
 pico_enable_stdio_uart(counter_test 0)
 
 # pull in common dependencies
-target_link_libraries(counter_lib pico_stdlib hardware_pwm hardware_spi hardware_i2c motor_lib)
+target_link_libraries(counter_lib pico_stdlib hardware_pwm motor_lib)
 target_link_libraries(counter_test counter_lib)
 
 # create map/bin/hex file etc.

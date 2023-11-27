@@ -27,6 +27,7 @@ add_subdirectory(motor_lib)
 add_subdirectory(Display)
 add_subdirectory(display_lib)
 add_subdirectory(counter_lib)
+add_subdirectory(encoder_lib)
 add_subdirectory(winder)
 
 add_compile_options(-Wall

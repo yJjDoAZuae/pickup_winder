@@ -1,3 +1,5 @@
+#include "pico/stdlib.h"
+
 #define DEBUG_USB 1
 
 int display_init();
