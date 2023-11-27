@@ -48,8 +48,8 @@ void encoder_callback(uint gpio, uint32_t events)
 			cw_fall = 0;
 			ccw_fall = 0;
 			//do something here,  for now it is just printing out CW or CCW
-			printf("CCW \r\n");
             enc_pos -= 1;
+            printf("CCW pos: %d\n", enc_pos);
 		}
 
 	}	
@@ -65,9 +65,9 @@ void encoder_callback(uint gpio, uint32_t events)
 			cw_fall = 0;
 			ccw_fall = 0;
 			//do something here,  for now it is just printing out CW or CCW
-			printf("CW \r\n");
 
             enc_pos += 1;
+            printf("CW  pos: %d\n", enc_pos);
 		}
 
 	}
