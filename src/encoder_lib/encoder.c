@@ -5,73 +5,138 @@
 #include "encoder.h"
 
 /*Encoder GPIO*/
-// GPIO 10 is Encoder phase A,  
-// GPIO 11 is Encoder phase B,
-// GPIO 12 is the encoder push botton switch.
 // change these as needed
+#define ENC_A	21  // Encoder phase A
+#define ENC_B	20  // Encoder phase B
+#define ENC_SW	22  // Encoder push botton switch
 
-#define ENC_A	10
-#define ENC_B	11
-#define ENC_SW	12
+static int enc_pos = 0;  // Encoder position state
 
-static int enc_pos = 0;
+// bool getBit(uint32_t field, uint8_t bitNum) {
+//     return (field & (0x1 << (bitNum - 1)));
+// }
 
-/* Encoder Callback*/
-/*
-        "LEVEL_LOW",  // 0x1
-        "LEVEL_HIGH", // 0x2
-        "EDGE_FALL",  // 0x4
-        "EDGE_RISE"   // 0x8
-*/
-void encoder_callback(uint gpio, uint32_t events) 
+// CW rotation 
+// ______        ______
+//      F1______R1           Phase A
+// __________        ______
+//          F2______R2       Phase B	
+// NOTE: Phase A leads Phase B for CW rotation
+
+// CCW Rotation
+// __________        ______
+//          F2______R2        Phase A	
+// ______        ______
+//      F1______R1            Phase B
+// NOTE: Phase B leads Phase A for CCW rotation
+
+void encoder_callback(uint gpio, uint32_t event) 
 {
-	
-	uint32_t gpio_state = 0;
+    
+    uint32_t gpio_state = 0;
 
-	gpio_state = (gpio_get_all() >> 10) & 0b0111;  	// get all GPIO them mask out all but bits 10, 11, 12
-													// This will need to change to match which GPIO pins are being used.
+    // TODO: do we still need to use this bitmask
+    // or is it better to just test each gpio separately?
+    // gpio_state = (gpio_get_all() >> 10) & 0b0111;  	// get all GPIO them mask out all but bits 10, 11, 12
+                                                    // This will need to change to match which GPIO pins are being used.
 
-	
-	static bool ccw_fall = 0;  //bool used when falling edge is triggered
-	static bool cw_fall = 0;
-	
-	uint8_t enc_value = 0;
-	enc_value = (gpio_state & 0x03);
+    bool encA_state = gpio_get(ENC_A);
+    bool encB_state = gpio_get(ENC_B);
+    bool encSW_state = gpio_get(ENC_SW);
+    
+    static bool ccw_fall = false;  // bool used when falling edge that implies CCW rotation is detected
+    static bool cw_fall = false;   // bool used when falling edge that implies CW rotation is detected
+    static bool ccw_rise = false;  // bool used when falling edge that implies CCW rotation is detected
+    static bool cw_rise = false;   // bool used when falling edge that implies CW rotation is detected
+    
+    // uint8_t enc_value = 0;
+    // enc_value = (gpio_state & 0x03);
 
-	if (gpio == ENC_A) 
-	{
-		if ((!cw_fall) && (enc_value == 0b10)) // cw_fall is set to TRUE when phase A interrupt is triggered
-			cw_fall = 1; 
+    if (gpio == ENC_A && event == GPIO_IRQ_EDGE_FALL) 
+    {
+        if (!cw_fall && encB_state)
+            // detect initial edge of CW rotation
+            cw_fall = true;
 
-		if ((ccw_fall) && (enc_value == 0b00)) // if ccw_fall is already set to true from a previous B phase trigger, the ccw event will be triggered 
-		{
-			cw_fall = 0;
-			ccw_fall = 0;
-			//do something here,  for now it is just printing out CW or CCW
+        if (ccw_fall && !encB_state)
+        {
+            // CCW rotation was already detected with an initial B fall, second fall on A confirms it
+            // increment the position counter
+            cw_fall = false;
+            ccw_fall = false;
+            cw_rise = false;
+            ccw_rise = false;
+
             enc_pos -= 1;
             printf("CCW pos: %d\n", enc_pos);
-		}
+        }
 
-	}	
+    }	
 
+    if (gpio == ENC_B && event == GPIO_IRQ_EDGE_FALL) 
+    {
+        if (!ccw_fall && encA_state)
+            // detect initial edge of CCW rotation
+            ccw_fall = true;
 
-	if (gpio == ENC_B) 
-	{
-		if ((!ccw_fall) && (enc_value == 0b01)) //ccw leading edge is true
-			ccw_fall = 1;
-
-		if ((cw_fall) && (enc_value == 0b00)) //cw trigger
-		{
-			cw_fall = 0;
-			ccw_fall = 0;
-			//do something here,  for now it is just printing out CW or CCW
+        if (cw_fall && !encA_state)
+        {
+            // CCW rotation was already detected with an initial B fall, second fall on A confirms it
+            // increment the position counter
+            cw_fall = false;
+            ccw_fall = false;
+            cw_rise = false;
+            ccw_rise = false;
 
             enc_pos += 1;
             printf("CW  pos: %d\n", enc_pos);
-		}
+        }
 
-	}
-	
+    }
+    
+    if (gpio == ENC_A && event == GPIO_IRQ_EDGE_RISE) 
+    {
+        if (!cw_rise && !encB_state)
+            // detect initial edge of CW rotation
+            cw_rise = true; 
+
+        if (ccw_rise && encB_state)
+        {
+            // CCW rotation was already detected with an initial B rise, second rise on A confirms it
+            // increment the position counter
+            cw_fall = false;
+            ccw_fall = false;
+            cw_rise = false;
+            ccw_rise = false;
+
+            enc_pos -= 1;
+            printf("CCW pos: %d\n", enc_pos);
+        }
+
+    }	
+
+    if (gpio == ENC_B && event == GPIO_IRQ_EDGE_RISE) 
+    {
+        if (!ccw_rise && !encA_state)
+            // detect initial edge of CCW rotation
+            ccw_rise = true;
+
+        if (cw_rise && encA_state)
+        {
+            // CW rotation was already detected with an initial A rise, second rise on B confirms it
+            // increment the position counter
+            cw_fall = false;
+            ccw_fall = false;
+            cw_rise = false;
+            ccw_rise = false;
+
+            enc_pos += 1;
+            printf("CW  pos: %d\n", enc_pos);
+        }
+
+    }
+
+
 }
 
 int get_enc_pos()
