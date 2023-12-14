@@ -17,23 +17,34 @@ static int enc_pos = 0;  // Encoder position state
 // }
 
 // CW rotation 
-// ______        ______
-//      F1______R1           Phase A
-// __________        ______
-//          F2______R2       Phase B	
+//             ________        
+//        ___R1        F1________  Phase A
+//                  ________    
+//        ________R2        F2___  Phase B	
+// state:  0    1    2    3    0
+// wave:  0x0  0x1  0x3  0x2  0x0
 // NOTE: Phase A leads Phase B for CW rotation
 
 // CCW Rotation
-// __________        ______
-//          F2______R2        Phase A	
-// ______        ______
-//      F1______R1            Phase B
+//                  ________
+//        ________R2        F2___  Phase A	
+//             ________
+//        ___R1        F1________  Phase B
+// state:  0    3    2    1    0
+// wave:  0x0  0x2  0x3  0x1  0x0
 // NOTE: Phase B leads Phase A for CCW rotation
 
-void encoder_callback(uint gpio, uint32_t event) 
+// TODO: for future generalization
+#define WLEN 4
+static const uint8_t waveform[WLEN] = {0, 1, 3, 2};
+
+void encoder_callback(uint gpio, uint32_t event)
 {
     
     uint32_t gpio_state = 0;
+
+    // TODO: generalize this to more than 2 encoder inputs and arbitrary waveforms
+
 
     // TODO: do we still need to use this bitmask
     // or is it better to just test each gpio separately?
