@@ -1,7 +1,7 @@
 
 #include "pico/stdlib.h"
 #include "pico/time.h"
-#include "../filter_lib/filter.h"
+#include "../control_lib/control.h"
 #include "pico.h"
 #include "hardware/structs/timer.h"
 #include "hardware/irq.h"

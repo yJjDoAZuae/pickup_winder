@@ -4,7 +4,7 @@
 #include "pico/time.h"
 #include "hardware/irq.h"
 #include "motor.h"
-#include "../filter_lib/filter.h"
+#include "../control_lib/control.h"
 
 const uint PIN_A = 2U;
 const uint PIN_B = 3U;

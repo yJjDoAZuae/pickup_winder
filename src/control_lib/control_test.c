@@ -3,7 +3,7 @@
 #include "pico/stdlib.h"
 #include "pico/time.h"
 
-#include "filter.h"
+#include "control.h"
 
 int main() {
 

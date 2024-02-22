@@ -1,7 +1,7 @@
 #include "math.h"
 #include <stdio.h>
 
-#include "filter.h"
+#include "control.h"
 
 float clip(float in, float vmin, float vmax)
 {
