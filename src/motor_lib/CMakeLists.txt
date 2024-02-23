@@ -12,7 +12,7 @@ pico_enable_stdio_usb(motor_test 1)
 pico_enable_stdio_uart(motor_test 0)
     
 # pull in common dependencies
-target_link_libraries(motor_lib pico_stdlib hardware_pwm filter_lib counter_lib)
+target_link_libraries(motor_lib pico_stdlib hardware_pwm control_lib counter_lib)
 target_link_libraries(motor_test motor_lib)
 
 # create map/bin/hex file etc.

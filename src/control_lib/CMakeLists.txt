@@ -17,7 +17,7 @@ pico_enable_stdio_uart(control_test 0)
 
 # pull in common dependencies
 target_link_libraries(control_lib pico_stdlib)
-target_link_libraries(control_test filter_lib pico_stdlib)
+target_link_libraries(control_test control_lib pico_stdlib)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(control_test)
