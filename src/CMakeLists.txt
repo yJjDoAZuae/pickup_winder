@@ -34,14 +34,14 @@ pico_sdk_init()
 include(example_auto_set_url.cmake)
 
 
-add_subdirectory(blink)
+# add_subdirectory(blink)
 add_subdirectory(control_lib)
 add_subdirectory(motor_lib)
 add_subdirectory(Display)
 add_subdirectory(display_lib)
 add_subdirectory(counter_lib)
 add_subdirectory(encoder_lib)
-add_subdirectory(winder)
+# add_subdirectory(winder)
 
 add_compile_options(-Wall
         -Wno-format          # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int

@@ -275,13 +275,13 @@ int arma_siso_deriv_1(float dt, float tau, arma_siso_filter_state_t * state)
 }
 
 int arma_siso_filter_coef_update(arma_buffer_t *num,
-                                 arma_buffer_t *den, uint8_t n, arma_siso_filter_state_t *state)
+                                 arma_buffer_t *den, int n, arma_siso_filter_state_t *state)
 {
 
     arma_buffer_init(&(state->a));
     arma_buffer_init(&(state->b));
 
-    if (n > ARMA_SISO_MAX_ORDER)
+    if (n < 0 || n > ARMA_SISO_MAX_ORDER)
     {
         return 1;
     }

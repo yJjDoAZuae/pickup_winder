@@ -1,5 +1,11 @@
 
-#include "pico/stdlib.h"
+
+#ifdef __arm__
+    #include "pico/stdlib.h"
+#else
+    #include <stdlib.h>
+    #include <stdbool.h>
+#endif
 
 #define ARMA_SISO_MAX_ORDER 8
 #define MAX_AW_STATES 12
@@ -16,7 +22,7 @@ int arma_buffer_init(arma_buffer_t *buff);
 typedef struct
 {
 
-    uint8_t n;  // filter order (0th order is a static gain defined by b[0])
+    int n;  // filter order (0th order is a static gain defined by b[0])
     arma_buffer_t a; // denominator coefficients, ordered by delay (z^-1).  E.g. a[0] is zero delay.  Note a[0] is ignored and set to 1.0f in all cases.
     arma_buffer_t b; // numerator coefficients, ordered by delay (z^-1). E.g. b[0] is zero delay.
     arma_buffer_t u; // input buffer
@@ -31,7 +37,7 @@ int arma_siso_filter_init(arma_siso_filter_state_t *state);
 // we don't do an eigenvalue test.
 int tustin_1(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t * numz, arma_buffer_t * denz);
 int tustin_2(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t * numz, arma_buffer_t * denz);
-int arma_siso_filter_coef_update(arma_buffer_t * num, arma_buffer_t * den, uint8_t n, arma_siso_filter_state_t * state);
+int arma_siso_filter_coef_update(arma_buffer_t * num, arma_buffer_t * den, int n, arma_siso_filter_state_t * state);
 
 int arma_siso_lowpass_1(float dt, float tau, arma_siso_filter_state_t *state);
 int arma_siso_lowpass_2(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state);
