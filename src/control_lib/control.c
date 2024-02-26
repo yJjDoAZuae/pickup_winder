@@ -81,7 +81,7 @@ int tustin_2(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t *
     return 0;
 }
 
-int arma_siso_lowpass_1(float dt, float tau, arma_siso_filter_state_t * state)
+int arma_siso_lowpass_1_design(float dt, float tau, arma_siso_filter_state_t * state)
 {
 
     arma_buffer_t numz;
@@ -125,7 +125,7 @@ int arma_siso_lowpass_1(float dt, float tau, arma_siso_filter_state_t * state)
     return arma_siso_filter_coef_update(&numz, &denz, 1, state);
 }
 
-int arma_siso_lowpass_2(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state)
+int arma_siso_lowpass_2_design(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state)
 {
 
     arma_buffer_t numz;
@@ -156,7 +156,7 @@ int arma_siso_lowpass_2(float dt, float wn, float zeta, float tau_zero, arma_sis
     return arma_siso_filter_coef_update(&numz, &denz, 2, state);
 }
 
-int arma_siso_notch_2(float dt, float wn, float zeta_den, 
+int arma_siso_notch_2_design(float dt, float wn, float zeta_den, 
     float zeta_num, arma_siso_filter_state_t *state)
 {
 
@@ -188,7 +188,7 @@ int arma_siso_notch_2(float dt, float wn, float zeta_den,
     return arma_siso_filter_coef_update(&numz, &denz, 2, state);
 }
 
-int arma_siso_highpass_1(float dt, float tau, arma_siso_filter_state_t * state)
+int arma_siso_highpass_1_design(float dt, float tau, arma_siso_filter_state_t * state)
 {
     arma_buffer_t numz;
     arma_buffer_t denz;
@@ -216,7 +216,7 @@ int arma_siso_highpass_1(float dt, float tau, arma_siso_filter_state_t * state)
     return arma_siso_filter_coef_update(&numz, &denz, 1, state);
 }
 
-int arma_siso_highpass_2(float dt, float wn, float zeta, float c_zero, arma_siso_filter_state_t *state)
+int arma_siso_highpass_2_design(float dt, float wn, float zeta, float c_zero, arma_siso_filter_state_t *state)
 {
     arma_buffer_t numz;
     arma_buffer_t denz;
@@ -246,7 +246,7 @@ int arma_siso_highpass_2(float dt, float wn, float zeta, float c_zero, arma_siso
     return arma_siso_filter_coef_update(&numz, &denz, 2, state);
 }
 
-int arma_siso_deriv_1(float dt, float tau, arma_siso_filter_state_t * state)
+int arma_siso_deriv_1_design(float dt, float tau, arma_siso_filter_state_t * state)
 {
     arma_buffer_t numz;
     arma_buffer_t denz;
@@ -615,7 +615,7 @@ int PID_set_dt(float dt, PID_state_t * state) {
     state->integ.dt = dt;
     state->dt = dt;
 
-    arma_siso_deriv_1(dt, state->deriv_tau, &(state->meas_deriv_filt));
+    arma_siso_deriv_1_design(dt, state->deriv_tau, &(state->meas_deriv_filt));
 
 }
 

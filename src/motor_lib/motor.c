@@ -131,7 +131,7 @@ void motor_step(int in_direction, float in_speed_cmd, float dt)
     speed_loop.meas.rlim.min = -3.0f;
     speed_loop.meas.rlim.max = 3.0f;
 
-    arma_siso_lowpass_1(dt, 1.0f, &(speed_loop.meas.filter));
+    arma_siso_lowpass_1_design(dt, 1.0f, &(speed_loop.meas.filter));
 
     speed_loop.err.vlim.min = -5.0f;
     speed_loop.err.vlim.max = 5.0f;
@@ -152,7 +152,7 @@ void motor_step(int in_direction, float in_speed_cmd, float dt)
     speed_loop.out.rlim.min = -0.25f;
     speed_loop.out.rlim.max = 0.25f;
 
-    arma_siso_lowpass_1(dt, 1.0f, &(speed_loop.out.filter));
+    arma_siso_lowpass_1_design(dt, 1.0f, &(speed_loop.out.filter));
 
     speed_loop.Kff = 1.0f;
     speed_loop.Kp = 0.1f;

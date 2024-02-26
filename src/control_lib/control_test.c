@@ -21,7 +21,7 @@ int main() {
     // tustin realization of a first order discrete lowpass IIR filter
     // arma_siso_lowpass_1_init(u, dt, tau, &state);
     arma_siso_filter_init(&state);
-    arma_siso_lowpass_2(dt, wn, zeta, 0.0f, &state);
+    arma_siso_lowpass_2_design(dt, wn, zeta, 0.0f, &state);
     arma_siso_filter_input_reset(0.0f, &state);
 
     u = 1.0;

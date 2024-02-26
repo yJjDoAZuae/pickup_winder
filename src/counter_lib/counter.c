@@ -45,7 +45,7 @@ int counter_init() {
     gpio_set_dir(COUNTER_GPIO_PIN, false);
     gpio_pull_up(COUNTER_GPIO_PIN);
 
-    arma_siso_lowpass_1(dt, period_tau, &(state.log2_period_filt));
+    arma_siso_lowpass_1_design(dt, period_tau, &(state.log2_period_filt));
     signal_init(&(state.speed_sig));
 
     state.speed_sig.vlim.min = 0.0f;
@@ -54,7 +54,7 @@ int counter_init() {
     state.speed_sig.rlim.max = 5.0f;
     state.speed_sig.rlim.dt = dt;
 
-    arma_siso_deriv_1(dt, deriv_tau, &(state.accel_filt));
+    arma_siso_deriv_1_design(dt, deriv_tau, &(state.accel_filt));
 
     return 0;
 };

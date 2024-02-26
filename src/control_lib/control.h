@@ -17,6 +17,7 @@ typedef struct
     float k[ARMA_SISO_MAX_ORDER+1];
 } arma_buffer_t;
 
+// Init a buffer to zeros
 int arma_buffer_init(arma_buffer_t *buff);
 
 typedef struct
@@ -30,23 +31,33 @@ typedef struct
 
 } arma_siso_filter_state_t;
 
+// Initialize a filter to zero state and output buffers and a zero order DC passthrough numerator and denominator
 int arma_siso_filter_init(arma_siso_filter_state_t *state);
 
 // NOTE: Only strictly stable filter designs should use these functions
 // Filters with a pure integrator root will return early, but
 // we don't do an eigenvalue test.
+
+// First order Tustin (bilinear) discrete time IIR filter realization
 int tustin_1(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t * numz, arma_buffer_t * denz);
+
+// Second order Tustin (bilinear) discrete time IIR filter realization 
 int tustin_2(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t * numz, arma_buffer_t * denz);
+
+// Update the coefficients of an ARMA SISO discrete IIR filter
 int arma_siso_filter_coef_update(arma_buffer_t * num, arma_buffer_t * den, int n, arma_siso_filter_state_t * state);
 
-int arma_siso_lowpass_1(float dt, float tau, arma_siso_filter_state_t *state);
-int arma_siso_lowpass_2(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state);
-int arma_siso_notch_2(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state);
-int arma_siso_highpass_1(float dt, float tau, arma_siso_filter_state_t *state);
-int arma_siso_highpass_2(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state);
-int arma_siso_deriv_1(float dt, float tau, arma_siso_filter_state_t *state);
+int arma_siso_lowpass_1_design(float dt, float tau, arma_siso_filter_state_t *state);
+int arma_siso_lowpass_2_design(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state);
+int arma_siso_notch_2_design(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state);
+int arma_siso_highpass_1_design(float dt, float tau, arma_siso_filter_state_t *state);
+int arma_siso_highpass_2_design(float dt, float wn, float zeta, float tau_zero, arma_siso_filter_state_t *state);
+int arma_siso_deriv_1_design(float dt, float tau, arma_siso_filter_state_t *state);
 
+// Reset a filter based on a constant input value
 int arma_siso_filter_input_reset(float in, arma_siso_filter_state_t *state);
+
+// Step a filter forward one iteration
 int arma_siso_filter_update(float in, float *out, arma_siso_filter_state_t *state);
 
 typedef struct
