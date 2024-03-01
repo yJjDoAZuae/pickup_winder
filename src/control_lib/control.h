@@ -9,8 +9,39 @@
 
 #define ARMA_SISO_MAX_ORDER 8
 #define MAX_AW_STATES 12
+#define FIR_SISO_MAX_ORDER 128
 
-float clip(float in, float vmin, float vmax);
+
+#include "math_constants.h"
+
+#ifndef CONTROL_H
+#define CONTROL_H
+
+// float version of clip
+float fclip(float in, float vmin, float vmax);
+
+// double version of clip
+double dclip(double in, double vmin, double vmax);
+
+// wraps an angle or angle difference,
+// maps (-inf, inf) onto [-pi, pi)
+float fpiwrap(float in);
+
+// wraps an angle or angle difference,
+// maps (-inf, inf) onto [-pi, pi)
+double dpiwrap(double in);
+
+// unwraps an angle based on an assumption that the previous 
+// unwrapped value, when wrapped should be within a [-pi,pi) 
+// interval of the current input,
+// maps [-pi,pi) x (-inf,inf) onto (-inf, inf)
+float fpiunwrap(float in, float prev);
+
+// unwraps an angle based on an assumption that the previous 
+// unwrapped value, when wrapped should be within a [-pi,pi) 
+// interval of the current input,
+// maps [-pi,pi) x (-inf,inf) onto (-inf, inf)
+double dpiunwrap(double in, double prev);
 
 typedef struct
 {
@@ -59,6 +90,27 @@ int arma_siso_filter_input_reset(float in, arma_siso_filter_state_t *state);
 
 // Step a filter forward one iteration
 int arma_siso_filter_update(float in, float *out, arma_siso_filter_state_t *state);
+
+
+typedef int fir_value_t;
+
+typedef struct
+{
+    fir_value_t k[FIR_SISO_MAX_ORDER];
+} fir_buffer_t;
+
+// Init a buffer to zeros
+int fir_buffer_init(fir_buffer_t *buff);
+
+typedef struct
+{
+
+    int n;  // filter order (0th order is a static gain defined by b[0])
+    fir_buffer_t b; // numerator coefficients, ordered by delay (z^-1). E.g. b[0] is zero delay.
+    fir_buffer_t u; // input buffer
+
+} fir_siso_filter_state_t;
+
 
 typedef struct
 {
@@ -162,3 +214,4 @@ int PID_reset(float cmd, float meas, float out, float integ, PID_state_t * state
 int PID_update_deriv(float cmd, float meas, float meas_dot, float * out, PID_state_t * state);
 int PID_update(float cmd, float meas, float * out, PID_state_t * state);
 
+#endif // CONTROL_H

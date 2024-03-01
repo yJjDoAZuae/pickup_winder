@@ -3,16 +3,43 @@
 
 #include "control.h"
 
-float clip(float in, float vmin, float vmax)
+float fclip(float in, float vmin, float vmax)
+{
+    return fminf(fmaxf(in, vmin), vmax);
+}
+
+double dclip(double in, double vmin, double vmax)
 {
     return fmin(fmax(in, vmin), vmax);
 }
 
+float fpiwrap(float in)
+{
+    float wraps = floorf(in/TWOPI + 0.5);
+    return in - TWOPI*wraps;
+}
+
+double dpiwrap(double in)
+{
+    double wraps = floor(in/TWOPI + 0.5);
+    return in - TWOPI*wraps;
+}
+
+float fpiunwrap(float in, float prev)
+{
+    float del = fpiwrap(in-prev);
+    return prev+del;
+}
+
+double dpiunwrap(double in, double prev)
+{
+    double del = piwrap(in-prev);
+    return prev+del;
+}
+
 int arma_buffer_init(arma_buffer_t *buff)
 {
-    for (int k = 0; k < ARMA_SISO_MAX_ORDER+1; k++) {
-        buff->k[k] = 0.0;
-    }
+    int rc = memset(buff, 0, sizeof(arma_buffer_t));
     return 0;
 }
 
@@ -368,6 +395,14 @@ int arma_siso_filter_update(float in, float *out, arma_siso_filter_state_t *stat
 
     return 0;
 }
+
+// Init a FIR buffer to zeros
+int fir_buffer_init(fir_buffer_t *buff)
+{
+    memset(buff, 0, FIR_SISO_MAX_ORDER*sizeof(fir_value_t));
+    return 0;
+}
+
 
 int limit_init(limit_state_t *state)
 {
