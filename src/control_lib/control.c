@@ -1,5 +1,6 @@
 #include "math.h"
 #include <stdio.h>
+#include <string.h>
 
 #include "control.h"
 
@@ -33,13 +34,13 @@ float fpiunwrap(float in, float prev)
 
 double dpiunwrap(double in, double prev)
 {
-    double del = piwrap(in-prev);
+    double del = dpiwrap(in-prev);
     return prev+del;
 }
 
 int arma_buffer_init(arma_buffer_t *buff)
 {
-    int rc = memset(buff, 0, sizeof(arma_buffer_t));
+    memset(*buff, 0, (ARMA_SISO_MAX_ORDER+1)*sizeof(float));
     return 0;
 }
 
@@ -55,10 +56,10 @@ int arma_siso_filter_init(arma_siso_filter_state_t *state)
     arma_buffer_init(&(state->b));
 
     // we ignore the first entry in den and set it to 1 in all cases
-    state->a.k[0] = 1.0f;
+    state->a[0] = 1.0f;
     
     // pass through with DC gain of 1.0
-    state->b.k[0] = 1.0f;
+    state->b[0] = 1.0f;
 
     return 0;
 }
@@ -69,7 +70,7 @@ int tustin_1(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t *
     const float tol = 1.0e-6;
 
     float K = 2.0f/dt;
-    float coeff_denom = den->k[0]*K + den->k[1];
+    float coeff_denom = *den[0]*K + *den[1];
 
     // printf("tustin_1: den->k[0] = %0.3f, den->k[1] = %0.3f, K = %0.3f\n", den->k[0], den->k[1], K);
 
@@ -77,11 +78,11 @@ int tustin_1(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t *
         return 1;
     }
     
-    numz->k[0] = (num->k[0]*K + num->k[1])/coeff_denom;
-    numz->k[1] = (-num->k[0]*K + num->k[1])/coeff_denom;
+    *numz[0] = (*num[0]*K + *num[1])/coeff_denom;
+    *numz[1] = (-*num[0]*K + *num[1])/coeff_denom;
 
-    denz->k[0] = 1.0f;
-    denz->k[1] = (-den->k[0]*K + den->k[1])/coeff_denom;
+    *denz[0] = 1.0f;
+    *denz[1] = (-*den[0]*K + *den[1])/coeff_denom;
 
     return 0;
 }
@@ -91,19 +92,19 @@ int tustin_2(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t *
     const float tol = 1.0e-6;
 
     float K = 2.0f/dt;
-    float coeff_denom = den->k[0]*K*K + den->k[1]*K + den->k[2];
+    float coeff_denom = *den[0]*K*K + *den[1]*K + *den[2];
 
     if (fabs(coeff_denom) < tol) {
         return 1;
     }
     
-    numz->k[0] = (     num->k[0]*K*K + num->k[1]*K +     num->k[2])/coeff_denom;
-    numz->k[1] = (-2.0*num->k[0]*K*K               + 2.0*num->k[2])/coeff_denom;
-    numz->k[2] = (     num->k[0]*K*K - num->k[1]*K +     num->k[2])/coeff_denom;
+    *numz[0] = (     *num[0]*K*K + *num[1]*K +     *num[2])/coeff_denom;
+    *numz[1] = (-2.0*(*num)[0]*K*K               + 2.0*(*num)[2])/coeff_denom;
+    *numz[2] = (     *num[0]*K*K - *num[1]*K +     *num[2])/coeff_denom;
 
-    denz->k[0] = 1.0f;
-    denz->k[1] = (-2.0*den->k[0]*K*K               + 2.0*den->k[2])/coeff_denom;
-    denz->k[2] = (     den->k[0]*K*K - den->k[1]*K +     den->k[2])/coeff_denom;
+    *denz[0] = 1.0f;
+    *denz[1] = (-2.0*(*den)[0]*K*K               + 2.0*(*den)[2])/coeff_denom;
+    *denz[2] = (     *den[0]*K*K - *den[1]*K +     *den[2])/coeff_denom;
 
     return 0;
 }
@@ -134,10 +135,10 @@ int arma_siso_lowpass_1_design(float dt, float tau, arma_siso_filter_state_t * s
     arma_buffer_init(&num);
     arma_buffer_init(&den);
 
-    num.k[0] = 0.0f;
-    num.k[1] = 1/tau;
-    den.k[0] = 1.0f;
-    den.k[1] = 1/tau;
+    num[0] = 0.0f;
+    num[1] = 1/tau;
+    den[0] = 1.0f;
+    den[1] = 1/tau;
 
     // printf("num[0] = %0.3f, num[1] = %0.3f, den[0] = %0.3f, den[1] = %0.3f\n", num.k[0], num.k[1], den.k[0], den.k[1]);
 
@@ -168,12 +169,12 @@ int arma_siso_lowpass_2_design(float dt, float wn, float zeta, float tau_zero, a
     arma_buffer_init(&num);
     arma_buffer_init(&den);
 
-    num.k[0] = 0.0f;
-    num.k[1] = tau_zero;
-    num.k[2] = wn*wn;
-    den.k[0] = 1.0f;
-    den.k[1] = 2.0*zeta*wn;
-    den.k[2] = wn*wn;
+    num[0] = 0.0f;
+    num[1] = tau_zero;
+    num[2] = wn*wn;
+    den[0] = 1.0f;
+    den[1] = 2.0*zeta*wn;
+    den[2] = wn*wn;
 
     int rc = tustin_2(&num, &den, dt, &numz, &denz);
     if (rc!=0) {
@@ -200,12 +201,12 @@ int arma_siso_notch_2_design(float dt, float wn, float zeta_den,
     arma_buffer_init(&num);
     arma_buffer_init(&den);
 
-    num.k[0] = 1.0f;
-    num.k[1] = 2.0*zeta_num*wn;
-    num.k[2] = wn*wn;
-    den.k[0] = 1.0f;
-    den.k[1] = 2.0*zeta_den*wn;
-    den.k[2] = wn*wn;
+    num[0] = 1.0f;
+    num[1] = 2.0*zeta_num*wn;
+    num[2] = wn*wn;
+    den[0] = 1.0f;
+    den[1] = 2.0*zeta_den*wn;
+    den[2] = wn*wn;
 
     int rc = tustin_2(&num, &den, dt, &numz, &denz);
     if (rc!=0) {
@@ -230,10 +231,10 @@ int arma_siso_highpass_1_design(float dt, float tau, arma_siso_filter_state_t * 
     arma_buffer_init(&num);
     arma_buffer_init(&den);
 
-    num.k[0] = 1/tau;
-    num.k[1] = 0.0f;
-    den.k[0] = 1.0f;
-    den.k[1] = 1/tau;
+    num[0] = 1/tau;
+    num[1] = 0.0f;
+    den[0] = 1.0f;
+    den[1] = 1/tau;
 
     int rc = tustin_1(&num, &den, dt, &numz, &denz);
     if (rc!=0) {
@@ -258,12 +259,12 @@ int arma_siso_highpass_2_design(float dt, float wn, float zeta, float c_zero, ar
     arma_buffer_init(&num);
     arma_buffer_init(&den);
 
-    num.k[0] = 1.0f;
-    num.k[1] = c_zero*2.0*zeta*wn;
-    num.k[2] = 0.0f;
-    den.k[0] = 1.0f;
-    den.k[1] = 2.0*zeta*wn;
-    den.k[2] = wn*wn;
+    num[0] = 1.0f;
+    num[1] = c_zero*2.0*zeta*wn;
+    num[2] = 0.0f;
+    den[0] = 1.0f;
+    den[1] = 2.0*zeta*wn;
+    den[2] = wn*wn;
 
     int rc = tustin_2(&num, &den, dt, &numz, &denz);
     if (rc!=0) {
@@ -288,10 +289,10 @@ int arma_siso_deriv_1_design(float dt, float tau, arma_siso_filter_state_t * sta
     arma_buffer_init(&num);
     arma_buffer_init(&den);
 
-    num.k[0] = 1/tau;
-    num.k[1] = 0.0f;
-    den.k[0] = 1.0f;
-    den.k[1] = 1/tau;
+    num[0] = 1/tau;
+    num[1] = 0.0f;
+    den[0] = 1.0f;
+    den[1] = 1/tau;
 
     int rc = tustin_1(&num, &den, dt, &numz, &denz);
     if (rc!=0) {
@@ -317,12 +318,12 @@ int arma_siso_filter_coef_update(arma_buffer_t *num,
 
     for (int k = 0; k < state->n + 1; k++)
     {
-        state->b.k[k] = num->k[k];
-        state->a.k[k] = den->k[k];
+        state->b[k] = *num[k];
+        state->a[k] = *den[k];
     }
 
     // we ignore the first entry in den and set it to 1 in all cases
-    state->a.k[0] = 1.0f;
+    state->a[0] = 1.0f;
 
     return 0;
 }
@@ -340,8 +341,8 @@ int arma_siso_filter_input_reset(float in, arma_siso_filter_state_t * state)
     float densum = 0.0f;
 
     for (int k = 0; k < state->n+1; k++) {
-        numsum += state->b.k[k];
-        densum += state->a.k[k];
+        numsum += state->b[k];
+        densum += state->a[k];
     }
 
     // We need an arbitrary finite DC gain to accomodate 
@@ -361,8 +362,8 @@ int arma_siso_filter_input_reset(float in, arma_siso_filter_state_t * state)
     }
 
     for (int k = 0; k < ARMA_SISO_MAX_ORDER; k++) {
-        state->u.k[k] = in;
-        state->y.k[k] = in*dcgain;
+        state->u[k] = in;
+        state->y[k] = in*dcgain;
     }
 
     return 0;
@@ -371,7 +372,7 @@ int arma_siso_filter_input_reset(float in, arma_siso_filter_state_t * state)
 int arma_siso_filter_update(float in, float *out, arma_siso_filter_state_t *state)
 {
 
-    *out = state->b.k[0]*in;
+    *out = state->b[0]*in;
 
     // NOTE: implicit state->a.k[0] == 1 because
     // we're assigning state->y.k[0] without a coefficient
@@ -381,17 +382,17 @@ int arma_siso_filter_update(float in, float *out, arma_siso_filter_state_t *stat
         // TRICKY: because we haven't rolled the buffers yet
         // the input and output buffer indices are one less
         // than the coefficient indices
-        *out += state->b.k[k] * state->u.k[k-1];
-        *out -= state->a.k[k] * state->y.k[k-1];
+        *out += state->b[k] * state->u[k-1];
+        *out -= state->a[k] * state->y[k-1];
     }
 
     // roll the buffers.  Always keep the whole buffer in case we change filter coefficients.
     for (int k = ARMA_SISO_MAX_ORDER; k > 0; k--) {
-        state->y.k[k] = state->y.k[k-1];
-        state->u.k[k] = state->u.k[k-1];
+        state->y[k] = state->y[k-1];
+        state->u[k] = state->u[k-1];
     }
-    state->y.k[0] = *out;
-    state->u.k[0] = in;
+    state->y[0] = *out;
+    state->u[0] = in;
 
     return 0;
 }
@@ -399,10 +400,72 @@ int arma_siso_filter_update(float in, float *out, arma_siso_filter_state_t *stat
 // Init a FIR buffer to zeros
 int fir_buffer_init(fir_buffer_t *buff)
 {
-    memset(buff, 0, FIR_SISO_MAX_ORDER*sizeof(fir_value_t));
+    memset(*buff, 0, FIR_SISO_MAX_ORDER*sizeof(fir_value_t));
     return 0;
 }
 
+// Initialize a FIR filter
+int fir_siso_filter_init(fir_siso_filter_state_t *state)
+{
+
+    int rc = 0;
+
+    state->n = 0;
+
+    rc = fir_buffer_init(&state->b);
+    if (rc!=0) {
+        return rc;
+    }
+
+    rc = fir_buffer_init(&state->u);
+    if (rc!=0) {
+        return rc;
+    }
+    
+    return rc;
+}
+
+// Reset a filter based on a constant input value
+int fir_siso_filter_input_reset(fir_value_t in, fir_siso_filter_state_t *state)
+{
+    if (state->n > FIR_SISO_MAX_ORDER){
+        return 0;
+    }
+
+    for (int k = state->n-1; k >= 0; k--) {
+        state->u[k] = in;
+    }
+
+    return 0;
+}
+
+// Reset a filter based on a constant input value
+int fir_siso_filter_output_reset(fir_value_t out, fir_siso_filter_state_t *state)
+{
+    // TODO:
+    return 0;
+}
+
+// Step a filter forward one iteration
+int fir_siso_filter_update(fir_value_t in, fir_value_t *out, fir_siso_filter_state_t *state)
+{
+    long long tmp_out = 0;
+
+    if (state->n > FIR_SISO_MAX_ORDER){
+        return 0;
+    }
+
+    for (int k = state->n-1; k > 0; k--) {
+        state->u[k] = state->u[k-1];
+        tmp_out += state->u[k] * state->b[k];
+    }
+    state->u[0] = in;
+    tmp_out += state->u[0]*state->b[0];
+
+    *out = tmp_out/state->n;
+
+    return 0;
+}
 
 int limit_init(limit_state_t *state)
 {

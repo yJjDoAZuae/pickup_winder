@@ -43,10 +43,7 @@ float fpiunwrap(float in, float prev);
 // maps [-pi,pi) x (-inf,inf) onto (-inf, inf)
 double dpiunwrap(double in, double prev);
 
-typedef struct
-{
-    float k[ARMA_SISO_MAX_ORDER+1];
-} arma_buffer_t;
+typedef float arma_buffer_t[ARMA_SISO_MAX_ORDER+1];
 
 // Init a buffer to zeros
 int arma_buffer_init(arma_buffer_t *buff);
@@ -88,16 +85,16 @@ int arma_siso_deriv_1_design(float dt, float tau, arma_siso_filter_state_t *stat
 // Reset a filter based on a constant input value
 int arma_siso_filter_input_reset(float in, arma_siso_filter_state_t *state);
 
+// Reset a filter based on a constant output value, assuming DC gain is non-zero
+int arma_siso_filter_output_reset(float out, arma_siso_filter_state_t *state);
+
 // Step a filter forward one iteration
 int arma_siso_filter_update(float in, float *out, arma_siso_filter_state_t *state);
 
 
 typedef int fir_value_t;
 
-typedef struct
-{
-    fir_value_t k[FIR_SISO_MAX_ORDER];
-} fir_buffer_t;
+typedef fir_value_t fir_buffer_t[FIR_SISO_MAX_ORDER];
 
 // Init a buffer to zeros
 int fir_buffer_init(fir_buffer_t *buff);
@@ -111,6 +108,17 @@ typedef struct
 
 } fir_siso_filter_state_t;
 
+// Initialize a FIR filter
+int fir_siso_filter_init(fir_siso_filter_state_t *state);
+
+// Reset a filter based on a constant input value
+int fir_siso_filter_input_reset(fir_value_t in, fir_siso_filter_state_t *state);
+
+// Reset a filter based on an output value
+int fir_siso_filter_output_reset(fir_value_t out, fir_siso_filter_state_t *state);
+
+// Step a filter forward one iteration
+int fir_siso_filter_update(fir_value_t in, fir_value_t *out, fir_siso_filter_state_t *state);
 
 typedef struct
 {

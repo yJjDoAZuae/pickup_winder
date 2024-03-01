@@ -1,5 +1,6 @@
 add_library(control_lib
         control.h
+        math_constants.h
         control.c
         )
 

@@ -40,8 +40,8 @@ int main() {
             y2 = 0.0f;
         }
 
-        printf("b[0] = %0.3f, b[1] = %0.3f, a[0] = %0.3f, a[1] = %0.3f\n", state.b.k[0], state.b.k[1], state.a.k[0], state.a.k[1]);
-        printf("u[0] = %0.3f, u[1] = %0.3f, y[0] = %0.3f, y[1] = %0.3f\n", state.u.k[0], state.u.k[1], state.y.k[0], state.y.k[1]);
+        printf("b[0] = %0.3f, b[1] = %0.3f, a[0] = %0.3f, a[1] = %0.3f\n", state.b[0], state.b[1], state.a[0], state.a[1]);
+        printf("u[0] = %0.3f, u[1] = %0.3f, y[0] = %0.3f, y[1] = %0.3f\n", state.u[0], state.u[1], state.y[0], state.y[1]);
 
         arma_siso_filter_update(u, &y, &state);
 
