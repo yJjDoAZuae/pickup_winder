@@ -75,7 +75,7 @@ int counter_update() {
 
     float inst_log2_period_us;
 
-    state.last_period_us = (uint64_t)clip(state.last_period_us, 1e6/small_speed, 1e6/15.0);
+    state.last_period_us = (uint64_t)dclip(state.last_period_us, 1e6/small_speed, 1e6/15.0);
 
     // if the period is increasing and we're already past the expected edge, use the latest duration
     if (this_ticks_us < state.time_at_edge_us + state.last_period_us) {
