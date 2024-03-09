@@ -2,8 +2,9 @@ add_library(control_lib
         control.h
         math_constants.h
         control.c
+        filter.h
+        filter.c
         )
-
  
 add_executable(control_test
     control_test.c
