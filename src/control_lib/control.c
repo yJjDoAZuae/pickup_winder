@@ -459,11 +459,30 @@ int fir_siso_filter_init(fir_siso_filter_state_t *state)
     return rc;
 }
 
+
+// Reset a filter based on a constant input value
+int fir_siso_filter_dcgain(fir_value_t * dcgain, fir_siso_filter_state_t *state)
+{
+    long long tmp_out = 0;
+
+    if (state->n > FIR_SISO_MAX_ORDER){
+        return 1;
+    }
+
+    for (int k = 0; k < state->n; k++) {
+        tmp_out += state->b[k];
+    }
+
+    *dcgain = tmp_out/state->n;
+
+    return 0;
+}
+
 // Reset a filter based on a constant input value
 int fir_siso_filter_input_reset(fir_value_t in, fir_siso_filter_state_t *state)
 {
     if (state->n > FIR_SISO_MAX_ORDER){
-        return 0;
+        return 1;
     }
 
     for (int k = state->n-1; k >= 0; k--) {
@@ -473,10 +492,34 @@ int fir_siso_filter_input_reset(fir_value_t in, fir_siso_filter_state_t *state)
     return 0;
 }
 
-// Reset a filter based on a constant input value
+// Reset a filter based on a constant output value
 int fir_siso_filter_output_reset(fir_value_t out, fir_siso_filter_state_t *state)
 {
-    // TODO:
+    long long sum_b = 0;
+
+    if (state->n > FIR_SISO_MAX_ORDER){
+        return 1;
+    }
+
+    for (int k = 0; k < state->n; k++) {
+        sum_b += state->b[k];
+    }
+
+    fir_value_t in = 0;
+    if (sum_b != 0) {
+        in = out*state->n / sum_b;
+    } else {
+        in = 0;
+    }
+
+    for (int k = 0; k < state->n; k++) {
+        state->u[k] = in;
+    }
+
+    if (sum_b == 0) {
+        return 2;
+    }
+
     return 0;
 }
 
@@ -486,7 +529,7 @@ int fir_siso_filter_update(fir_value_t in, fir_value_t *out, fir_siso_filter_sta
     long long tmp_out = 0;
 
     if (state->n > FIR_SISO_MAX_ORDER){
-        return 0;
+        return 1;
     }
 
     for (int k = state->n-1; k > 0; k--) {

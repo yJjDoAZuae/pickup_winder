@@ -111,6 +111,9 @@ typedef struct
 
 } fir_siso_filter_state_t;
 
+// Return DC gain of a FIR filter design
+int fir_siso_filter_dcgain(fir_value_t * dcgain, fir_siso_filter_state_t *state);
+
 // Initialize a FIR filter
 int fir_siso_filter_init(fir_siso_filter_state_t *state);
 
