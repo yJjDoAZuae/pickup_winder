@@ -144,7 +144,7 @@ int arma_siso_lowpass_1_design(float dt, float tau, arma_siso_filter_state_t * s
 
     int rc = tustin_1(&num, &den, dt, &numz, &denz);
     if (rc!=0) {
-        printf("tustin returned %d\n", rc);
+        // printf("tustin returned %d\n", rc);
         return rc;
     }
 
@@ -335,6 +335,45 @@ int arma_siso_filter_input_reset(float in, arma_siso_filter_state_t * state)
     arma_buffer_init(&(state->u));
     arma_buffer_init(&(state->y));
 
+    float dcgain;
+    int rc = arma_siso_filter_dcgain(&dcgain, state);
+
+    if (rc == 0) {
+        for (int k = 0; k < ARMA_SISO_MAX_ORDER; k++) {
+            state->u[k] = in;
+            state->y[k] = in*dcgain;
+        }
+    }
+
+    return 0;
+}
+
+int arma_siso_filter_output_reset(float out, arma_siso_filter_state_t * state)
+{
+    const float tol = 1e-6;
+
+    arma_buffer_init(&(state->u));
+    arma_buffer_init(&(state->y));
+
+    float dcgain;
+    int rc = arma_siso_filter_dcgain(&dcgain, state);
+
+    if (rc == 0 && fabs(dcgain) > tol) {
+        for (int k = 0; k < ARMA_SISO_MAX_ORDER; k++) {
+            state->y[k] = out;
+            state->u[k] = out/dcgain;
+        }
+    } else {
+        return 1;
+    }
+
+    return 0;
+}
+
+int arma_siso_filter_dcgain(float * dcgain, arma_siso_filter_state_t *state)
+{
+    const float tol = 1e-6;
+
     // TRICKY: potential access to uninitialized data
     // for zeroth order (static gain) case.
     float numsum = 0.0f;
@@ -348,22 +387,17 @@ int arma_siso_filter_input_reset(float in, arma_siso_filter_state_t * state)
     // We need an arbitrary finite DC gain to accomodate 
     // band pass, high pass, and lead/lag filters filters
     // TODO: Filter stability test?
+    *dcgain = 0.0f;
 
-    float dcgain;
     // Test for infinite DC gain.
     // Pure integrators should not be implemented
     // using an ARMA filter.
     if (fabs(densum) > tol) {
-        dcgain = numsum/densum;
+        *dcgain = numsum/densum;
 
-        printf("dcgain = %0.3f\n", dcgain);
+        // printf("dcgain = %0.3f\n", dcgain);
     } else {
-        return 2;
-    }
-
-    for (int k = 0; k < ARMA_SISO_MAX_ORDER; k++) {
-        state->u[k] = in;
-        state->y[k] = in*dcgain;
+        return 1;
     }
 
     return 0;

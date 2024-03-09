@@ -66,6 +66,9 @@ int arma_siso_filter_init(arma_siso_filter_state_t *state);
 // Filters with a pure integrator root will return early, but
 // we don't do an eigenvalue test.
 
+// Return DC gain of a filter design
+int arma_siso_filter_dcgain(float * dcgain, arma_siso_filter_state_t *state);
+
 // First order Tustin (bilinear) discrete time IIR filter realization
 int tustin_1(arma_buffer_t * num, arma_buffer_t * den, float dt, arma_buffer_t * numz, arma_buffer_t * denz);
 
