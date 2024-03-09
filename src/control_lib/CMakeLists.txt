@@ -4,6 +4,8 @@ add_library(control_lib
         control.c
         filter.h
         filter.c
+        limit.h
+        limit.c
         )
  
 add_executable(control_test
